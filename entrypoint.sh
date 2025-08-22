@@ -1,15 +1,14 @@
-#!/usr/bin/env bash
-set -e
+                       #!/bin/sh
+                       set -eu
 
-CONF="/etc/tinyproxy/tinyproxy.conf"
-mkdir -p /etc/tinyproxy
-cp /tmp/tinyproxy.conf "$CONF"
+                       CONF=/etc/tinyproxy/tinyproxy.conf
 
-if [[ -n "$PROXY_USER" && -n "$PROXY_PASS" ]]; then
-  echo "BasicAuth $PROXY_USER $PROXY_PASS" >> "$CONF"
-  echo "[tinyproxy] Auth enabled"
-else
-  echo "[tinyproxy] Auth DISABLED (open proxy) — not recommended"
-fi
+                       # If you set PROXY_USER / PROXY_PASS in this service's Variables,
+                       # we append BasicAuth automatically.
+                       if [ -n "${PROXY_USER:-}" ] && [ -n "${PROXY_PASS:-}" ]; then
+                         echo "BasicAuth ${PROXY_USER} ${PROXY_PASS}" >> "$CONF"
+                         echo "[entrypoint] Added BasicAuth"
+                       fi
 
-exec tinyproxy -d -c "$CONF"
+                       echo "[entrypoint] Starting tinyproxy on 0.0.0.0:8888"
+                       exec tinyproxy -d -c "$CONF"
